@@ -1,0 +1,18 @@
+.blog-preview {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  column-gap: 20px;
+}
+
+.blog-metadata {
+  text-align: right;
+}
+
+.blog-title {
+  font-size: 18pt;
+}
+
+.blog-author {
+  margin: 0;
+}

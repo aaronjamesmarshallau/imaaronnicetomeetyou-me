@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+
+  <head>
+    {{> commonHead }}
+    <title>Aaron Marshall | Blog</title>
+    <link rel="stylesheet" href="/assets/common.css" />
+    <link rel="stylesheet" href="/assets/blog.css" />
+  </head>
+
+  <body>
+    <div class="page-layout">
+      {{> header}}
+      <div class="content">
+        <div class="content-column">
+          {{#each posts}}
+            {{> blogPreview this }}
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

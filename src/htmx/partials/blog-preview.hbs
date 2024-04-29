@@ -1,0 +1,20 @@
+<div class="blog-preview" x-data>
+  <div class="blog-metadata">
+    <div><h4 class="blog-author">{{author}}</h4></div>
+    <div
+      x-text="dateFns.format(dateFns.parseISO('{{created_at}}'), 'h:mm aa')"
+    ></div>
+    <div
+      x-text="dateFns.format(dateFns.parseISO('{{created_at}}'), &quot;do 'of' MMMM&quot;)"
+    ></div>
+    <div
+      x-text="dateFns.format(dateFns.parseISO('{{created_at}}'), 'yyyy')"
+    ></div>
+  </div>
+  <div class="blog-content">
+    <h1 class="blog-title">{{title}}</h1>
+    {{content}}
+
+    <a href="/blog/{{id}}">Continue reading...</a>
+  </div>
+</div>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+
+  <head>
+    {{> commonHead }}
+    <title>Aaron Marshall | Admin</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/debug.js"></script>
+    <link rel="stylesheet" href="/assets/common.css" />
+    <link rel="stylesheet" href="/assets/admin.css" />
+    <script
+      src="https://cdn.tiny.cloud/1/3qa7vd3mbdv9zj8lozm7qcdbci3kwnurga0pksind9eue3d8/tinymce/7/tinymce.min.js"
+      referrerpolicy="origin"
+    ></script>
+  </head>
+
+  <body>
+    <script>
+      tinymce.init({
+        selector: '#blog-editor',
+        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed linkchecker a11ychecker tinymcespellchecker permanentpen powerpaste advtable advcode editimage advtemplate ai mentions tinycomments tableofcontents footnotes mergetags autocorrect typography inlinecss markdown',
+        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+        tinycomments_mode: 'embedded',
+        tinycomments_author: 'Author name',
+        mergetags_list: [
+          { value: 'First.Name', title: 'First Name' },
+          { value: 'Email', title: 'Email' },
+        ],
+        setup: function (editor) { editor.on('change', function () { tinymce.triggerSave(); }); },
+        ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
+      });
+    </script>
+    <div class="page-layout">
+      {{> header}}
+      <div class="content">
+        <div class="content-column">
+          <h1>Create Blog Post</h1>
+          <form hx-post="/blog" hx-ext="debug" hx-swap="innerHTML">
+            <input id="post-title" type="text" name="title" value="" placeholder="Title" required="required"/>
+            <textarea name="content" id="blog-editor">
+              
+            </textarea>
+            <div class="button-tray">
+              <button class="blog-button" type="submit">Post</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>
