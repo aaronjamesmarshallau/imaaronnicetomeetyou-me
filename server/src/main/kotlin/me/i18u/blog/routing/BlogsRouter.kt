@@ -97,6 +97,7 @@ class BlogsRouter(val blogRepository: BlogRepository)  {
                 .map { authHeader -> authHeader.replace("Bearer ", "") }
                 // Parse token to object
                 .flatMap { token -> JsonWebToken.parse(token) }
+                .flatMap { jwt -> jwt.validate() }
                 // Get payload
                 .flatMap { jwt -> jwt.getPayload() }
                 // Check expiry on payload

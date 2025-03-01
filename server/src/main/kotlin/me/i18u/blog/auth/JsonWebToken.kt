@@ -5,6 +5,7 @@ import arrow.core.None
 import arrow.core.left
 import arrow.core.right
 import kotlinx.serialization.json.Json
+import me.i18u.blog.AuthError
 import me.i18u.blog.DataError
 import me.i18u.blog.Error
 import java.util.Base64
@@ -31,6 +32,23 @@ data class JsonWebToken(val header: String, val payload: String, val signature: 
         }.mapLeft { throwable -> DataError.BadFormat("The provided JWT payload is malformed.", None) }
 
         return payload
+    }
+
+    fun validate(): Either<Error, JsonWebToken> {
+        val encodedHeader = this.header.toByteArray(Charsets.UTF_8)
+        val encodedPayload = this.payload.toByteArray(Charsets.UTF_8)
+        val hs256 = Mac.getInstance(HASH_ALGORITHM)
+        val secretKeySpec = SecretKeySpec(SECRET.toByteArray(Charsets.UTF_8), HASH_ALGORITHM)
+
+        hs256.init(secretKeySpec) // Vom
+
+        val signature = hs256.doFinal(encodedHeader + ".".toByteArray(Charsets.UTF_8) + encodedPayload)
+        val encodedSignature = Base64.getEncoder().encode(signature)
+
+        if (encodedSignature.equals(this.signature)) {
+            return this.right()
+        }
+        return AuthError.InvalidToken(None).left()
     }
 
     companion object {
