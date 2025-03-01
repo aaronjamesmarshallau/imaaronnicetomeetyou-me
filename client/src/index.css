@@ -1,0 +1,9 @@
+#root,
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    font-family: "FantasqueSansM Nerd Font Mono"
+}

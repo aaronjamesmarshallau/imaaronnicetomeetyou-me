@@ -1,0 +1,30 @@
+services:
+  db:
+    image: "postgres:17"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: "example123"
+      POSTGRES_USER: "i18u-service"
+      POSTGRES_DB: "i18u"
+  web:
+    env_file: ".env"
+    build:
+      context: .
+      dockerfile: dev.dockerfile
+    ports:
+      - "5174:5174"
+    volumes:
+      - ".:/app"
+    working_dir: "/app"
+    command: "./gradlew run"
+    environment:
+      DB_USER: "i18u-service"
+      DB_PASS: "example123"
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_DATABASE: "i18u"
+      KTOR_LOG_LEVEL: "TRACE"
+      LOG_LEVEL: "TRACE"
+    depends_on:
+      - "db"
