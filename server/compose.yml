@@ -9,6 +9,7 @@ services:
       POSTGRES_DB: "i18u"
   web:
     env_file: ".env"
+    user: "${UID}:${GID}"
     build:
       context: .
       dockerfile: dev.dockerfile

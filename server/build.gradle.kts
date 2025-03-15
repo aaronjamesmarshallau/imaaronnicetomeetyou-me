@@ -1,4 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 
 plugins {
     java
@@ -27,6 +30,8 @@ val kotlinxSerializationVersion = "1.8.0"
 val logbackVersion = "1.5.16"
 val argon2Version = "2.11"
 val logstashLogbackVersion = "4.11"
+val kotestVersion = "5.9.1"
+val kotestArrowVersion = "2.0.0"
 
 dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -54,7 +59,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
 
-    testImplementation(kotlin("test"))
+    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("io.kotest.extensions:kotest-assertions-arrow:$kotestArrowVersion")
 }
 
 application {
@@ -65,11 +72,15 @@ tasks {
     named<ShadowJar>("shadowJar") {
         mergeServiceFiles()
     }
+
+    withType<Test>().configureEach {
+        useJUnitPlatform()
+        testLogging {
+            events = setOf(PASSED, SKIPPED, FAILED)
+        }
+    }
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 kotlin {
     jvmToolchain(21)
     compilerOptions {

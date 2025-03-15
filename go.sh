@@ -63,6 +63,19 @@ function publish_server {
     docker push "$image"
 }
 
+function test_client {
+    cd client
+
+    npm install
+    npm run test
+}
+
+function test_server {
+    cd server
+
+    docker compose run web gradle test
+}
+
 case $command in
     build_client)
         build_client
@@ -84,6 +97,12 @@ case $command in
         ;;
     publish_server)
         publish_server "$@"
+        ;;
+    test_client)
+        test_client
+        ;;
+    test_server)
+        test_server
         ;;
     *)
         help
