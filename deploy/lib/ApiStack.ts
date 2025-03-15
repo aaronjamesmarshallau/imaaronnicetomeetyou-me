@@ -9,8 +9,12 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
+interface ApiStackProps extends StackProps {
+  apiVersion: string;
+}
+
 export class ApiStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
     // Create a VPC for ECS
@@ -88,7 +92,7 @@ export class ApiStack extends Stack {
       memoryLimitMiB: 1024,
     });
     taskDefinition.addContainer('AppContainer', {
-      image: ContainerImage.fromEcrRepository(ecrRepo, '0.0.9'), // Replace with your Docker image
+      image: ContainerImage.fromEcrRepository(ecrRepo, props.apiVersion), // Replace with your Docker image
       memoryLimitMiB: 1024,
       cpu: 512,
       stopTimeout: cdk.Duration.seconds(15),

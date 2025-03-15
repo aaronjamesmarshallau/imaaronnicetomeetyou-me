@@ -26,5 +26,6 @@ services:
       DB_USER: "i18u-service"
       KTOR_LOG_LEVEL: "TRACE"
       LOG_LEVEL: "TRACE"
+      JWT_SECRET: "example_jwt_secret"
     depends_on:
       - "db"

@@ -1,0 +1,64 @@
+on:
+  push:
+
+jobs:
+  check-client:
+    name: Check/Test Client
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v2
+    - name: Code test
+      id: test
+      run: ./go.sh test_client
+  check-server:
+    name: Check/Test Server
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v2
+    - name: Code test
+      id: test
+      run: ./go.sh test_server
+  publish-server:
+    name: Publish Server
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: check-server
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v2
+    - name: Publish to ECR
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+        AWS_DEFAULT_REGION: ap-southeast-2
+      run: ./go.sh publish_server ${{ github.sha }}
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: publish-server
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v2
+    - name: Deploy via CDK
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+        AWS_DEFAULT_REGION: ap-southeast-2
+      run: ./go.sh deploy ${{ github.sha }}
+  publish-client:
+    name: Publish Client
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: deploy-infrastructure
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@v2
+    - name: Sync assets to Server
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+        AWS_DEFAULT_REGION: ap-southeast-2
+      run: ./go.sh publish_client

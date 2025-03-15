@@ -20,10 +20,11 @@ function build_server {
 }
 
 function deploy {
+    version=$2
     cd deploy
 
     npm install
-    npx aws-cdk deploy --all
+    API_VERSION=$version npx aws-cdk deploy --all
 }
 
 function help {
@@ -48,20 +49,15 @@ function package_client {
 }
 
 function publish_client {
+    package_client
     aws s3 --region us-east-1 cp --recursive client/dist s3://c167edda-e053-442a-8195-06d5-websitebucket75c24d94-qtquukauwtef/
 }
 
 function publish_server {
     version=$2
-
-    if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]] ; then
-        echo "Provided version must match semantic versioning, received: $version"
-        exit 2
-    fi
-
     image="$ECR_REPO/i18u/server:$version"
 
-    aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 041260952467.dkr.ecr.ap-southeast-2.amazonaws.com
+    aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REPO
 
     docker build -t "$image" server
     docker push "$image"
@@ -75,7 +71,7 @@ case $command in
         build_server
         ;;
     deploy)
-        deploy
+        deploy "$@"
         ;;
     help)
         help
