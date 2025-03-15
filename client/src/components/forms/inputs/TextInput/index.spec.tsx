@@ -29,7 +29,7 @@ const renderWithTheme = (el: ReactElement): RenderResult => {
 
 describe("TextInput", () => {
   it("renders", () => {
-    const result = renderWithTheme(<TextInput placeholder='example'/>);
+    renderWithTheme(<TextInput placeholder='example'/>);
 
     expect(true).toBeTruthy();
   })
