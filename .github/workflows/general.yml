@@ -24,7 +24,9 @@ jobs:
     name: Publish Server
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: check-server
+    needs: 
+    - check-server
+    - check-client
     steps:
     - name: Checkout Source
       uses: actions/checkout@v2
