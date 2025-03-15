@@ -50,6 +50,7 @@ function package_client {
 
 function publish_client {
     package_client
+    cd ..
     aws s3 --region us-east-1 cp --recursive dist s3://c167edda-e053-442a-8195-06d5-websitebucket75c24d94-qtquukauwtef/
 }
 
