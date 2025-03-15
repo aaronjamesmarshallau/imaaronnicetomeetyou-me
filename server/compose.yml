@@ -8,7 +8,6 @@ services:
       POSTGRES_USER: "i18u-service"
       POSTGRES_DB: "i18u"
   web:
-    env_file: ".env"
     user: "${UID}:${GID}"
     build:
       context: .
@@ -20,6 +19,8 @@ services:
     working_dir: "/app"
     command: "./gradlew run"
     environment:
+      UID: 1000
+      GID: 100
       DB_DATABASE: "i18u"
       DB_HOST: "db"
       DB_PASS: "example123"
