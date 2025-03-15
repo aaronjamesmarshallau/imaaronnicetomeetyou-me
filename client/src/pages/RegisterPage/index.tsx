@@ -4,6 +4,8 @@ import styled from "styled-components";
 import { TextInput } from "../../components/forms/inputs/TextInput";
 import { Button } from "../../components/forms/inputs/Button";
 
+export const API_URL = import.meta.env.VITE_API_URL || "";
+
 const RegisterModal = styled("div")`
   position: absolute;
   width: 400px;
@@ -37,7 +39,7 @@ const RegisterPage: FunctionComponent = () => {
 
   const onSubmitClick: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
-    fetch("/api/auth/register", {
+    fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

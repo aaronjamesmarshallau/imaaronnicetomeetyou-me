@@ -38,21 +38,21 @@ data class JsonWebToken(val header: String, val payload: String, val signature: 
         val encodedHeader = this.header.toByteArray(Charsets.UTF_8)
         val encodedPayload = this.payload.toByteArray(Charsets.UTF_8)
         val hs256 = Mac.getInstance(HASH_ALGORITHM)
-        val secretKeySpec = SecretKeySpec(SECRET.toByteArray(Charsets.UTF_8), HASH_ALGORITHM)
+        val secretKeySpec = SecretKeySpec(secret.toByteArray(Charsets.UTF_8), HASH_ALGORITHM)
 
         hs256.init(secretKeySpec) // Vom
 
         val signature = hs256.doFinal(encodedHeader + ".".toByteArray(Charsets.UTF_8) + encodedPayload)
-        val encodedSignature = Base64.getEncoder().encode(signature)
+        val encodedSignature = Base64.getEncoder().encode(signature).toString(Charsets.UTF_8)
 
-        if (encodedSignature.equals(this.signature)) {
+        if (encodedSignature == this.signature) {
             return this.right()
         }
         return AuthError.InvalidToken(None).left()
     }
 
     companion object {
-        const val SECRET = "example_secret_key"
+        val secret: String = System.getenv("JWT_SECRET")
 
         fun create(header: JwtHeader, payload: JwtPayload): JsonWebToken {
             val headerJson = Json.encodeToString(header)
@@ -62,7 +62,7 @@ data class JsonWebToken(val header: String, val payload: String, val signature: 
             val encodedPayload = Base64.getEncoder().encode(payloadJson.toByteArray(Charsets.UTF_8))
 
             val hs256 = Mac.getInstance(HASH_ALGORITHM)
-            val secretKeySpec = SecretKeySpec(SECRET.toByteArray(Charsets.UTF_8), HASH_ALGORITHM)
+            val secretKeySpec = SecretKeySpec(secret.toByteArray(Charsets.UTF_8), HASH_ALGORITHM)
 
             hs256.init(secretKeySpec) // Vom
 

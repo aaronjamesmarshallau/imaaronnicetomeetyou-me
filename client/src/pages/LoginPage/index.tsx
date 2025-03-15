@@ -7,6 +7,8 @@ import { CheckBoxInput } from "../../components/forms/inputs/CheckBoxInput";
 import { useNavigate } from "react-router";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../../auth";
 
+export const API_URL = import.meta.env.VITE_API_URL || "";
+
 const LoginModal = styled("div")`
   position: absolute;
   width: 400px;
@@ -59,7 +61,7 @@ const LoginPage: FunctionComponent = () => {
 
   const onSubmitClick: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
-    fetch("/api/auth/login", {
+    fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

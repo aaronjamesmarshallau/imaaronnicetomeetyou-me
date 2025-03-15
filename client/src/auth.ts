@@ -1,5 +1,6 @@
 export const REFRESH_TOKEN_KEY = "refreshToken";
 export const ACCESS_TOKEN_KEY = "accessToken";
+export const API_URL = import.meta.env.VITE_API_URL || "";
 
 interface JwtHeader {
   alg: string;
@@ -69,7 +70,7 @@ export const getAccessTokenDetails = (): JsonWebToken | null => {
 
 export const fetchAccessToken = async (): Promise<void> => {
   const refreshToken = getRefreshToken();
-  const response = await fetch("/api/auth/token", {
+  const response = await fetch(`${API_URL}/api/auth/token`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

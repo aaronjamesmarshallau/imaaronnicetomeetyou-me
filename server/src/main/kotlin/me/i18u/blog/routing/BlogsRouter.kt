@@ -27,12 +27,14 @@ import me.i18u.blog.db.abstraction.BlogRepository
 import me.i18u.blog.transport.model.Blog
 import me.i18u.blog.transport.model.BlogCreateRequest
 import me.i18u.blog.transport.model.BlogCreateResponse
+import org.slf4j.Logger
 import java.time.Instant
+import java.util.logging.LogManager
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-class BlogsRouter(val blogRepository: BlogRepository)  {
+class BlogsRouter(val blogRepository: BlogRepository, val logger: Logger)  {
     fun addRoutes(application: Application): Unit {
         application.routing {
             route("/api/blogs") {
@@ -54,7 +56,10 @@ class BlogsRouter(val blogRepository: BlogRepository)  {
 
                     call.respond(transportBlogs)
                 }
-                is Left -> call.respondText(result.value.cause.toString())
+                is Left -> {
+                    logger.error(result.value.toString())
+                    call.respondText("sql fuckies")
+                }
             }
         }
     }
@@ -73,7 +78,10 @@ class BlogsRouter(val blogRepository: BlogRepository)  {
                         else -> call.respond(HttpStatusCode.NotFound)
                     }
                 }
-                is Left -> call.respondText(result.value.cause.toString())
+                is Left -> {
+                    logger.error(result.value.toString())
+                    call.respondText("sql fuckies")
+                }
             }
         }
     }
@@ -122,6 +130,8 @@ class BlogsRouter(val blogRepository: BlogRepository)  {
                 }
                 is Left -> {
                     val error = result.value
+
+                    logger.error(error.toString())
 
                     when (error) {
                         is EncryptionError -> call.respondText("encryption fuckies")

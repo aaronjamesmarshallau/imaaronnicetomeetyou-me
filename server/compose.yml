@@ -19,11 +19,11 @@ services:
     working_dir: "/app"
     command: "./gradlew run"
     environment:
-      DB_USER: "i18u-service"
-      DB_PASS: "example123"
-      DB_HOST: "db"
-      DB_PORT: "5432"
       DB_DATABASE: "i18u"
+      DB_HOST: "db"
+      DB_PASS: "example123"
+      DB_PORT: "5432"
+      DB_USER: "i18u-service"
       KTOR_LOG_LEVEL: "TRACE"
       LOG_LEVEL: "TRACE"
     depends_on:

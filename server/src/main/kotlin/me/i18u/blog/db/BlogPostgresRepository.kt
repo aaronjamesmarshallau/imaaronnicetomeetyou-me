@@ -11,12 +11,13 @@ import me.i18u.blog.db.model.BlogCreate
 import net.samyn.kapper.coroutines.withConnection
 import net.samyn.kapper.query
 import net.samyn.kapper.querySingle
+import org.slf4j.Logger
 import javax.sql.DataSource
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
-class BlogPostgresRepository(val db: DataSource) : BlogRepository {
+class BlogPostgresRepository(val db: DataSource, val logger: Logger) : BlogRepository {
     override suspend fun getBlogs(): Either<SqlError, List<Blog>> {
         return db.withConnection { connection ->
             Either.catch { connection.query<Blog>("SELECT id, title, created_at as createdAt, content FROM blogs ORDER BY created_at DESC;") }

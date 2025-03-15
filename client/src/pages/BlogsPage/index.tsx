@@ -8,6 +8,8 @@ import { EditorView } from "codemirror";
 import '@mdxeditor/editor/style.css'
 import { Page } from "../Page";
 
+export const API_URL = import.meta.env.VITE_API_URL || "";
+
 interface BlogsPageProps {
 }
 
@@ -78,7 +80,8 @@ const StyledEditor = styled(MDXEditor)`
 `;
 
 const getBlogs = (): Promise<Blog[]> => {
-  return fetch("/api/blogs", {
+  console.log(`Fetching from: ${API_URL}`);
+  return fetch(`${API_URL}/api/blogs`, {
     method: "GET",
   })
     .then((response) => response.json())

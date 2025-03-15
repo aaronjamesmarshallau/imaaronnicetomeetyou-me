@@ -9,6 +9,8 @@ import { Button } from "../../components/forms/inputs/Button";
 import { authFetch, isLoggedIn } from "../../auth";
 import { useNavigate } from "react-router-dom";
 
+export const API_URL = import.meta.env.VITE_API_URL || "";
+
 const TitleInput = styled("input")`
   width: 100%;
   height: 40px;
@@ -116,7 +118,7 @@ const plugins = [
 ]
 
 const publishBlog = (title: string, content: string) => (_evt: React.MouseEvent<HTMLButtonElement>): Promise<Response> => {
-  return authFetch("/api/blogs", {
+  return authFetch(`${API_URL}/api/blogs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

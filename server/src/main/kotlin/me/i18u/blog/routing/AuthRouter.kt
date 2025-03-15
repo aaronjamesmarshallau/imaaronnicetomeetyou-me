@@ -12,7 +12,6 @@ import arrow.core.right
 import arrow.core.some
 import de.mkammerer.argon2.Argon2
 import io.ktor.server.application.Application
-import io.ktor.server.engine.logError
 import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.response.respond
@@ -40,6 +39,7 @@ import me.i18u.blog.transport.model.UserLoginRequest
 import me.i18u.blog.transport.model.UserLoginResponse
 import me.i18u.blog.transport.model.UserRegisterRequest
 import me.i18u.blog.transport.model.UserRegisterResponse
+import org.slf4j.Logger
 import java.time.Instant
 import java.util.UUID
 import kotlin.random.Random
@@ -50,8 +50,7 @@ private const val REFRESH_TOKEN_LENGTH: Int = 20
 
 
 @OptIn(ExperimentalUuidApi::class)
-class AuthRouter(val argon2: Argon2, val userRepository: UserRepository, val tokenRepository: TokenRepository) {
-
+class AuthRouter(val argon2: Argon2, val userRepository: UserRepository, val tokenRepository: TokenRepository, val logger: Logger) {
     fun addRoutes(application: Application): Unit {
         application.routing {
             route("/api/auth") {
@@ -71,11 +70,19 @@ class AuthRouter(val argon2: Argon2, val userRepository: UserRepository, val tok
             val errorOrUser: Either<Error, UUID> = Either.catch { argon2.hash(10, 65536, 1, password) }
                 .map { hash -> UserCreate(request.email, hash) }
                 .mapLeft { throwable -> EncryptionError.UnknownError(throwable.some()) }
+                .flatMap { userCreate ->
+                    if (userCreate.email != "hi@imaaronnicetomeetyou.me") {
+                        DataError.BadFormat("You cannot create an account.", None).left()
+                    }
+                    userCreate.right()
+                }
                 .flatMap { userCreate -> userRepository.createUser(userCreate) }
 
             when (errorOrUser) {
                 is Left -> {
                     val error = errorOrUser.value
+
+                    logger.error(error.toString())
 
                     when (error) {
                         is EncryptionError -> call.respondText("encryption fuckies")
@@ -137,7 +144,7 @@ class AuthRouter(val argon2: Argon2, val userRepository: UserRepository, val tok
                 is Left -> {
                     val error = errorOrUserLoginResponse.value
 
-                    error.cause.onSome { logError(call, it) }
+                    logger.error(error.toString())
 
                     when (error) {
                         is EncryptionError -> call.respondText("encryption fuckies")
@@ -203,7 +210,7 @@ class AuthRouter(val argon2: Argon2, val userRepository: UserRepository, val tok
                 is Left -> {
                     val error = errorOrAccessToken.value
 
-                    error.cause.onSome { logError(call, it) }
+                    logger.error(error.toString())
 
                     when (error) {
                         is EncryptionError -> call.respondText("encryption fuckies")

@@ -18,6 +18,7 @@ import me.i18u.blog.db.UserPostgresRepository
 import me.i18u.blog.routing.AuthRouter
 import me.i18u.blog.routing.BlogsRouter
 import org.flywaydb.core.Flyway
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -30,6 +31,7 @@ fun main() {
     val dbPort = System.getenv("DB_PORT")
     val dbPass = System.getenv("DB_PASS")
     val dbDatabase = System.getenv("DB_DATABASE")
+    val logger = LoggerFactory.getLogger("application")
 
     // Db Setup
     val config = HikariConfig().apply {
@@ -47,14 +49,14 @@ fun main() {
 
     val server = createServer()
 
-    val blogRepository = BlogPostgresRepository(dataSource)
-    val userRepository = UserPostgresRepository(dataSource)
-    val tokenRepository = TokenPostgresRepository(dataSource)
+    val blogRepository = BlogPostgresRepository(dataSource, logger)
+    val userRepository = UserPostgresRepository(dataSource, logger)
+    val tokenRepository = TokenPostgresRepository(dataSource, logger)
 
     val argon2 = Argon2Factory.create()
 
-    val blogRouter = BlogsRouter(blogRepository)
-    val authRouter = AuthRouter(argon2, userRepository, tokenRepository)
+    val blogRouter = BlogsRouter(blogRepository, logger)
+    val authRouter = AuthRouter(argon2, userRepository, tokenRepository, logger)
 
     blogRouter.addRoutes(server.application)
     authRouter.addRoutes(server.application)

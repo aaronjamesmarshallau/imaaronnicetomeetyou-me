@@ -16,6 +16,7 @@ import me.i18u.blog.db.model.UserCreate
 import me.i18u.blog.db.model.Email
 import net.samyn.kapper.coroutines.withConnection
 import net.samyn.kapper.querySingle
+import org.slf4j.Logger
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.coroutines.coroutineContext
@@ -36,7 +37,7 @@ public suspend fun <T> DataSource.withConnectionCatching(block: suspend (java.sq
     }
 }
 
-class UserPostgresRepository(val db: DataSource) : UserRepository {
+class UserPostgresRepository(val db: DataSource, val logger: Logger) : UserRepository {
     override suspend fun createUser(userData: UserCreate): Either<SqlError, UUID> {
         return db.withConnectionCatching { connection ->
             connection.querySingle<Identifier>(

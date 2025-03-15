@@ -8,5 +8,12 @@ export default defineConfig({
       '/api': 'http://localhost:5174'
     }
   },
+  build: {
+    terserOptions: {
+      compress: {
+        drop_console: false,
+      },
+    },
+  },
   plugins: [react()],
 })

@@ -7,6 +7,7 @@ import me.i18u.blog.SqlError
 import me.i18u.blog.db.abstraction.TokenRepository
 import net.samyn.kapper.execute
 import net.samyn.kapper.querySingle
+import org.slf4j.Logger
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
@@ -14,7 +15,7 @@ import javax.sql.DataSource
 
 data class TokenEntry(val id: UUID, val userId: UUID, val refreshToken: String, val createdAt: Instant, val expiresAt: Instant)
 
-class TokenPostgresRepository(val db: DataSource): TokenRepository {
+class TokenPostgresRepository(val db: DataSource, val logger: Logger): TokenRepository {
     override suspend fun addToken(
         userId: UUID,
         refresh: String,
