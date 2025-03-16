@@ -8,7 +8,6 @@ services:
       POSTGRES_USER: "i18u-service"
       POSTGRES_DB: "i18u"
   web:
-    user: "${UID}:${GID}"
     build:
       context: .
       dockerfile: dev.dockerfile
@@ -19,8 +18,6 @@ services:
     working_dir: "/app"
     command: "./gradlew run"
     environment:
-      UID: 1000
-      GID: 100
       DB_DATABASE: "i18u"
       DB_HOST: "db"
       DB_PASS: "example123"
@@ -29,5 +26,11 @@ services:
       KTOR_LOG_LEVEL: "TRACE"
       LOG_LEVEL: "TRACE"
       JWT_SECRET: "example_jwt_secret"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5174/api/blogs" ]
+      interval: 5s
+      retries: 5
+      timeout: 3s
+      start_period: 10s
     depends_on:
       - "db"

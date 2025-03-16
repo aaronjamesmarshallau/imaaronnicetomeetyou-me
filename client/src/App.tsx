@@ -5,6 +5,7 @@ import { CreatePage } from "./pages/CreatePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { DefaultPage } from "./pages/DefaultPage";
 import { LoginPage } from "./pages/LoginPage";
+import { BlogPage } from "./pages/BlogPage";
 
 const darkTheme = {
   background: {
@@ -29,6 +30,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<DefaultPage />} >
             <Route path="/" element={<BlogsPage />} />
+            <Route path="/b/:blogId" element={<BlogPage />} />
             <Route path="/create" element={<CreatePage />} />
           </Route>
           <Route path="/register" element={<RegisterPage />} />

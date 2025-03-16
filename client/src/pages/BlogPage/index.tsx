@@ -7,6 +7,7 @@ import { EditorView } from "codemirror";
 
 import '@mdxeditor/editor/style.css'
 import { Page } from "../Page";
+import { useParams } from "react-router-dom";
 
 export const API_URL = import.meta.env.VITE_API_URL || "";
 
@@ -70,15 +71,6 @@ const plugins = [
   directivesPlugin({ directiveDescriptors: [AdmonitionDirectiveDescriptor] }),
 ];
 
-const BlogTitle = styled("h2")`
-  text-decoration: underline;
-  color: ${({ theme }) => theme.foreground.primary};
-
-  & a:visited {
-    color: ${({ theme }) => theme.foreground.primary};
-  }
-`;
-
 const StyledEditor = styled(MDXEditor)`
   --baseTextContrast: ${({ theme }) => theme.foreground.primary};
 
@@ -88,34 +80,40 @@ const StyledEditor = styled(MDXEditor)`
   }
 `;
 
-const getBlogs = (): Promise<Blog[]> => {
-  console.log(`Fetching from: ${API_URL}`);
-  return fetch(`${API_URL}/api/blogs`, {
+const getBlog = (blogId: string): Promise<Blog> => {
+  return fetch(`${API_URL}/api/blogs/${blogId}`, {
     method: "GET",
   })
     .then((response) => response.json())
-    .then((responseJson) => responseJson as unknown as any[])
-    .then((responseJson) => responseJson.map((value) => ({
-      ...value,
-      createdAt: new Date(value.createdAt),
-    }))
-    )
+    .then((responseJson) => responseJson as unknown as any)
+    .then((responseJson) => ({
+      ...responseJson,
+      createdAt: new Date(responseJson.createdAt),
+    }));
 };
 
-export const BlogsPage: FunctionComponent<BlogsPageProps> = () => {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
+export const BlogPage: FunctionComponent<BlogsPageProps> = () => {
+  const [blog, setBlog] = useState<Blog | undefined>(undefined);
+  const { blogId } = useParams();
+
+  if (!blogId) {
+    return (
+      <Page>
+        Oh no!
+      </Page>
+    )
+  }
+
   useEffect(() => {
-    getBlogs()
-      .then((data) => setBlogs(data));
+    getBlog(blogId)
+      .then((data) => setBlog(data));
   }, []);
 
   return (
     <Page>
-      {blogs.map((blog) => (
-        <article key={blog.blogId}>
-          <BlogTitle>
-            <a href={`/b/${blog.blogId}`}>{blog.title}</a>
-          </BlogTitle>
+      {
+        blog && <article key={blog.blogId}>
+          <h2>{blog.title}</h2>
           <sub>{blog.createdAt.toDateString()}</sub>
           <div>
             <StyledEditor
@@ -125,7 +123,7 @@ export const BlogsPage: FunctionComponent<BlogsPageProps> = () => {
               contentEditableClassName="prose" />
           </div>
         </article>
-      ))}
+      }
     </Page>
   )
 }
