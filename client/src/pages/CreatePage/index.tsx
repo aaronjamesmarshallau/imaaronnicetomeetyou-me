@@ -1,6 +1,6 @@
 import { ChangeEvent, ChangeEventHandler, FunctionComponent, useEffect, useState } from "react";
 import styled from "styled-components";
-import { AdmonitionDirectiveDescriptor, BlockTypeSelect, BoldItalicUnderlineToggles, codeBlockPlugin, codeMirrorPlugin, CodeToggle, CreateLink, diffSourcePlugin, DiffSourceToggleWrapper, directivesPlugin, InsertAdmonition, listsPlugin, markdownShortcutPlugin, MDXEditor, quotePlugin, thematicBreakPlugin, toolbarPlugin } from '@mdxeditor/editor'
+import { AdmonitionDirectiveDescriptor, BlockTypeSelect, BoldItalicUnderlineToggles, codeBlockPlugin, codeMirrorPlugin, CodeToggle, CreateLink, diffSourcePlugin, DiffSourceToggleWrapper, directivesPlugin, InsertAdmonition, listsPlugin, markdownShortcutPlugin, MDXEditor, quotePlugin, thematicBreakPlugin, toolbarPlugin, linkPlugin } from '@mdxeditor/editor'
 import { headingsPlugin } from '@mdxeditor/editor'
 
 import '@mdxeditor/editor/style.css'
@@ -55,6 +55,7 @@ const plugins = [
   headingsPlugin(),
   quotePlugin(),
   listsPlugin(),
+  linkPlugin(),
   thematicBreakPlugin(),
   codeBlockPlugin(),
   codeMirrorPlugin({
