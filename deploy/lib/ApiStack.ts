@@ -23,17 +23,7 @@ export class ApiStack extends Stack {
       maxAzs: 1,
       natGateways: 0,
       subnetConfiguration: [
-        {
-          name: 'Public',
-          subnetType: SubnetType.PUBLIC,
-        }
       ],
-    });
-
-    const subnetGroup = new SubnetGroup(this, "PublicSubnets", {
-      vpcSubnets: { subnetType: SubnetType.PUBLIC },
-      vpc,
-      description: "Public subnets"
     });
     
     // Create an RDS database instance
@@ -71,7 +61,6 @@ export class ApiStack extends Stack {
       }),
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO), // Instance class size, e.g., T3.micro
       vpc,
-      subnetGroup,
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       multiAz: false,
