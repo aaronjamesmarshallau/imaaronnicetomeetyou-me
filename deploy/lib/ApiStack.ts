@@ -126,15 +126,15 @@ export class ApiStack extends Stack {
     
 
     // Create ECS service
-    const fargateService = new ApplicationLoadBalancedFargateService(this, 'FargateService', {
+    const fargateService = new FargateService(this, 'FargateService', {
       cluster,
       taskDefinition,
     });
 
-    rdsInstance.connections.allowDefaultPortFrom(fargateService.service)
+    rdsInstance.connections.allowDefaultPortFrom(fargateService)
 
     // Allow inbound traffic from the ECS task's security group on the default RDS port (e.g., 3306 for MySQL)
-    rdsSecurityGroup.addIngressRule(fargateService.service.connections.securityGroups[0], Port.tcp(5432));
+    rdsSecurityGroup.addIngressRule(fargateService.connections.securityGroups[0], Port.tcp(5432));
 
     // Create an Application Load Balancer (ALB)
     const alb = new ApplicationLoadBalancer(this, 'ALB', {
@@ -157,7 +157,7 @@ export class ApiStack extends Stack {
     httpsListener.addTargets('AppTargets', {
       port: 5147,
       protocol: ApplicationProtocol.HTTP,
-      targets: [fargateService.service],
+      targets: [fargateService],
       healthCheck: {
         path: "/api/blogs",
       }
