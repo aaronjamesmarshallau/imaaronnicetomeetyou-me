@@ -64,6 +64,7 @@ export class ApiStack extends Stack {
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       multiAz: false,
+      publiclyAccessible: true,
       allocatedStorage: 20,
       storageType: StorageType.GP3,
       databaseName: 'i18u',
