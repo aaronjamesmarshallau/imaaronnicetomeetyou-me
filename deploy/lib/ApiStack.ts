@@ -8,6 +8,7 @@ import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, Storag
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
 
 interface ApiStackProps extends StackProps {
   apiVersion: string;
@@ -20,6 +21,7 @@ export class ApiStack extends Stack {
     // Create a VPC for ECS
     const vpc = new Vpc(this, 'imaaronnicetomeetyou-me-vpc', {
       maxAzs: 3, // 3 Availability Zones for high availability
+      natGateways: 0,
       subnetConfiguration: [
         {
           name: 'Public',
@@ -91,6 +93,7 @@ export class ApiStack extends Stack {
       cpu: 512,
       memoryLimitMiB: 1024,
     });
+
     taskDefinition.addContainer('AppContainer', {
       image: ContainerImage.fromEcrRepository(ecrRepo, props.apiVersion), // Replace with your Docker image
       memoryLimitMiB: 1024,
@@ -120,16 +123,18 @@ export class ApiStack extends Stack {
       },
     });
 
+    
+
     // Create ECS service
-    const fargateService = new FargateService(this, 'FargateService', {
+    const fargateService = new ApplicationLoadBalancedFargateService(this, 'FargateService', {
       cluster,
       taskDefinition,
     });
 
-    rdsInstance.connections.allowDefaultPortFrom(fargateService)
+    rdsInstance.connections.allowDefaultPortFrom(fargateService.service)
 
     // Allow inbound traffic from the ECS task's security group on the default RDS port (e.g., 3306 for MySQL)
-    rdsSecurityGroup.addIngressRule(fargateService.connections.securityGroups[0], Port.tcp(5432));
+    rdsSecurityGroup.addIngressRule(fargateService.service.connections.securityGroups[0], Port.tcp(5432));
 
     // Create an Application Load Balancer (ALB)
     const alb = new ApplicationLoadBalancer(this, 'ALB', {
@@ -152,7 +157,7 @@ export class ApiStack extends Stack {
     httpsListener.addTargets('AppTargets', {
       port: 5147,
       protocol: ApplicationProtocol.HTTP,
-      targets: [fargateService],
+      targets: [fargateService.service],
       healthCheck: {
         path: "/api/blogs",
       }
