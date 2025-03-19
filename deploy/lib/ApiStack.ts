@@ -1,10 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { Vpc, SubnetType, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, SubnetType, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, Peer } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
-import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
+import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType, SubnetGroup } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
@@ -20,7 +20,7 @@ export class ApiStack extends Stack {
 
     // Create a VPC for ECS
     const vpc = new Vpc(this, 'imaaronnicetomeetyou-me-vpc', {
-      maxAzs: 3, // 3 Availability Zones for high availability
+      maxAzs: 1,
       natGateways: 0,
       subnetConfiguration: [
         {
@@ -29,6 +29,8 @@ export class ApiStack extends Stack {
         }
       ],
     });
+
+    const subnetGroup = SubnetGroup.fromSubnetGroupName(this, "PublicSubnet", "Public");
     
     // Create an RDS database instance
     const rdsSecurityGroup = new SecurityGroup(this, 'RdsSecurityGroup', {
@@ -68,6 +70,7 @@ export class ApiStack extends Stack {
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       multiAz: false,
+      subnetGroup,
       allocatedStorage: 20,
       storageType: StorageType.GP3,
       databaseName: 'i18u',
