@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { Vpc, SubnetType, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, Peer } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, SubnetType, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, Peer, Subnet } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
@@ -29,8 +29,6 @@ export class ApiStack extends Stack {
         }
       ],
     });
-
-    const subnetGroup = SubnetGroup.fromSubnetGroupName(this, "PublicSubnet", "Public");
     
     // Create an RDS database instance
     const rdsSecurityGroup = new SecurityGroup(this, 'RdsSecurityGroup', {
@@ -67,10 +65,12 @@ export class ApiStack extends Stack {
       }),
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO), // Instance class size, e.g., T3.micro
       vpc,
+      vpcSubnets: {
+        subnetType: SubnetType.PUBLIC,
+      },
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       multiAz: false,
-      subnetGroup,
       allocatedStorage: 20,
       storageType: StorageType.GP3,
       databaseName: 'i18u',
