@@ -24,7 +24,7 @@ function deploy {
     cd deploy
 
     npm install
-    API_VERSION=$version npx aws-cdk deploy --all
+    API_VERSION=$version npx aws-cdk deploy --all --require-approval never
 }
 
 function help {
