@@ -129,6 +129,12 @@ export class ApiStack extends Stack {
     const fargateService = new FargateService(this, 'FargateService', {
       cluster,
       taskDefinition,
+      capacityProviderStrategies: [
+        {
+          capacityProvider: "FARGATE_SPOT",
+          weight: 1,
+        }
+      ]
     });
 
     rdsInstance.connections.allowDefaultPortFrom(fargateService)
