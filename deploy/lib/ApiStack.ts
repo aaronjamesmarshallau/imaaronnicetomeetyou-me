@@ -26,10 +26,6 @@ export class ApiStack extends Stack {
         {
           name: 'Public',
           subnetType: SubnetType.PUBLIC,
-        },
-        {
-          name: 'Private',
-          subnetType: SubnetType.PRIVATE_WITH_EGRESS
         }
       ],
     });
@@ -123,8 +119,6 @@ export class ApiStack extends Stack {
       },
     });
 
-    
-
     // Create ECS service
     const fargateService = new FargateService(this, 'FargateService', {
       cluster,
@@ -134,7 +128,8 @@ export class ApiStack extends Stack {
           capacityProvider: "FARGATE_SPOT",
           weight: 1,
         }
-      ]
+      ],
+      assignPublicIp: true,
     });
 
     rdsInstance.connections.allowDefaultPortFrom(fargateService)
