@@ -19,7 +19,7 @@ export class ApiStack extends Stack {
 
     // Create a VPC for ECS
     const vpc = new Vpc(this, 'imaaronnicetomeetyou-me-vpc', {
-      maxAzs: 1,
+      maxAzs: 2,
       natGateways: 0,
       ipAddresses: IpAddresses.cidr('10.1.0.0/16'),
     });
