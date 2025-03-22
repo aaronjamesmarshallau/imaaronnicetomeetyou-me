@@ -1,14 +1,13 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { Vpc, SubnetType, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, Peer, Subnet } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
-import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType, SubnetGroup } from 'aws-cdk-lib/aws-rds';
+import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { ApplicationLoadBalancedFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
 
 interface ApiStackProps extends StackProps {
   apiVersion: string;
@@ -59,6 +58,7 @@ export class ApiStack extends Stack {
       }),
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO), // Instance class size, e.g., T3.micro
       vpc,
+      vpcSubnets: { subnetType: SubnetType.PUBLIC },
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       multiAz: false,
