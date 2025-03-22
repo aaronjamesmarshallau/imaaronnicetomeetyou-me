@@ -68,11 +68,15 @@ export class ApiStack extends Stack {
       }),
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO), // Instance class size, e.g., T3.micro
       vpc,
-      vpcSubnets: { subnetType: SubnetType.PUBLIC },
+      vpcSubnets: { subnetFilters: [
+        {
+          selectSubnets: (subnet) => subnet
+        }
+      ] },
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      multiAz: false,
-      publiclyAccessible: false,
+      multiAz: true,
+      publiclyAccessible: true,
       allocatedStorage: 20,
       storageType: StorageType.GP3,
       databaseName: 'i18u',
