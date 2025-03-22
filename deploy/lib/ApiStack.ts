@@ -22,8 +22,6 @@ export class ApiStack extends Stack {
     const vpc = new Vpc(this, 'imaaronnicetomeetyou-me-vpc', {
       maxAzs: 1,
       natGateways: 0,
-      subnetConfiguration: [
-      ],
     });
     
     // Create an RDS database instance
