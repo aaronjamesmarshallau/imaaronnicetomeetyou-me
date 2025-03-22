@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType, IpAddresses } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
@@ -21,6 +21,7 @@ export class ApiStack extends Stack {
     const vpc = new Vpc(this, 'imaaronnicetomeetyou-me-vpc', {
       maxAzs: 1,
       natGateways: 0,
+      ipAddresses: IpAddresses.cidr('10.1.0.0/16'),
     });
     
     // Create an RDS database instance
