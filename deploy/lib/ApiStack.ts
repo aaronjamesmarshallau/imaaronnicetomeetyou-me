@@ -19,9 +19,18 @@ export class ApiStack extends Stack {
 
     // Create a VPC for ECS
     const vpc = new Vpc(this, 'imaaronnicetomeetyou-me-vpc', {
-      maxAzs: 2,
+      maxAzs: 3,
       natGateways: 0,
-      ipAddresses: IpAddresses.cidr('10.1.0.0/16'),
+      subnetConfiguration: [
+        {
+          subnetType: SubnetType.PUBLIC,
+          name: 'Public',
+        },
+        {
+          subnetType: SubnetType.PRIVATE_ISOLATED,
+          name: 'Private'
+        }
+      ]
     });
     
     // Create an RDS database instance
@@ -59,11 +68,10 @@ export class ApiStack extends Stack {
       }),
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO), // Instance class size, e.g., T3.micro
       vpc,
-      vpcSubnets: { subnetType: SubnetType.PUBLIC },
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       multiAz: false,
-      publiclyAccessible: true,
+      publiclyAccessible: false,
       allocatedStorage: 20,
       storageType: StorageType.GP3,
       databaseName: 'i18u',
