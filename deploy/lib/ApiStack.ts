@@ -68,7 +68,7 @@ export class ApiStack extends Stack {
       }),
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO), // Instance class size, e.g., T3.micro
       vpc,
-      vpcSubnets: { subnetType: SubnetType.PRIVATE_ISOLATED },
+      vpcSubnets: { subnetType: SubnetType.PUBLIC },
       securityGroups: [rdsSecurityGroup],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       multiAz: false,
