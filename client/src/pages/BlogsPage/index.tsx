@@ -1,7 +1,7 @@
 import { FunctionComponent, useEffect, useState } from "react"
 import styled from "styled-components";
 import { Blog } from "../../models/Blog";
-import { headingsPlugin, quotePlugin, listsPlugin, thematicBreakPlugin, codeBlockPlugin, codeMirrorPlugin, directivesPlugin, AdmonitionDirectiveDescriptor, MDXEditor } from "@mdxeditor/editor";
+import { headingsPlugin, quotePlugin, listsPlugin, thematicBreakPlugin, codeBlockPlugin, codeMirrorPlugin, directivesPlugin, AdmonitionDirectiveDescriptor, MDXEditor, linkPlugin } from "@mdxeditor/editor";
 import { EditorState } from "@codemirror/state"
 import { EditorView } from "codemirror";
 
@@ -16,6 +16,7 @@ interface BlogsPageProps {
 const plugins = [
   headingsPlugin(),
   quotePlugin(),
+  linkPlugin(),
   listsPlugin(),
   thematicBreakPlugin(),
   codeBlockPlugin(),
