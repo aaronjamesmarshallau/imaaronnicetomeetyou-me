@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType, IpAddresses } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
@@ -11,6 +11,7 @@ import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 interface ApiStackProps extends StackProps {
   apiVersion: string;
+  tunnelToken: string;
 }
 
 export class ApiStack extends Stack {
@@ -91,8 +92,8 @@ export class ApiStack extends Stack {
 
     // Define the ECS task definition
     const taskDefinition = new FargateTaskDefinition(this, 'ApiTaskDef', {
-      cpu: 512,
-      memoryLimitMiB: 1024,
+      cpu: 768,
+      memoryLimitMiB: 1536,
     });
 
     taskDefinition.addContainer('AppContainer', {
@@ -124,6 +125,24 @@ export class ApiStack extends Stack {
       },
     });
 
+    taskDefinition.addContainer("CloudflaredContainer", {
+      cpu: 256,
+      memoryLimitMiB: 512,
+      essential: true,
+      image: ContainerImage.fromRegistry("cloudflare/cloudflared:2025.2.1"),
+      environment: {
+        "TUNNEL_TOKEN": props.tunnelToken
+      },
+      portMappings: [
+        {
+          name: "cloudflare",
+          containerPort: 2000,
+          protocol: Protocol.TCP,
+        }
+      ],
+      command: ["tunnel", "--metrics", "0.0.0.0:2000", "run"]
+    });
+
     // Create ECS service
     const fargateService = new FargateService(this, 'FargateService', {
       cluster,
@@ -141,33 +160,6 @@ export class ApiStack extends Stack {
 
     // Allow inbound traffic from the ECS task's security group on the default RDS port (e.g., 3306 for MySQL)
     rdsSecurityGroup.addIngressRule(fargateService.connections.securityGroups[0], Port.tcp(5432));
-
-    // Create an Application Load Balancer (ALB)
-    const alb = new ApplicationLoadBalancer(this, 'ALB', {
-      vpc,
-      internetFacing: true,
-    });
-
-    const apiCertificate = new Certificate(this, 'ApiCertificate', {
-      domainName: "api.imaaronnicetomeetyou.me",
-    });
-
-    const httpsListener = alb.addListener('HttpsListener', {
-      port: 443,
-      protocol: ApplicationProtocol.HTTPS,
-      certificates: [
-        apiCertificate
-      ]
-    });
-    
-    httpsListener.addTargets('AppTargets', {
-      port: 5147,
-      protocol: ApplicationProtocol.HTTP,
-      targets: [fargateService],
-      healthCheck: {
-        path: "/api/blogs",
-      }
-    });
 
     // Output the RDS endpoint URL for reference
     new cdk.CfnOutput(this, 'RdsEndpoint', {
