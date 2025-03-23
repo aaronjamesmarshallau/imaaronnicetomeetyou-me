@@ -92,8 +92,8 @@ export class ApiStack extends Stack {
 
     // Define the ECS task definition
     const taskDefinition = new FargateTaskDefinition(this, 'ApiTaskDef', {
-      cpu: 768,
-      memoryLimitMiB: 1536,
+      cpu: 1024,
+      memoryLimitMiB: 2048,
     });
 
     taskDefinition.addContainer('AppContainer', {
