@@ -14,6 +14,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -41,13 +42,15 @@ class BlogsRouter(val blogRepository: BlogRepository, val logger: Logger)  {
                 createBlog()
                 listBlogs()
                 getBlog()
+                deleteBlog()
             }
         }
     }
 
     private fun Route.listBlogs() {
         get {
-            val result = blogRepository.getBlogs()
+            val includeArchived = call.queryParameters["include_archived"] == "true"
+            val result = blogRepository.getBlogs(includeArchived)
 
             when (result) {
                 is Right -> {
@@ -81,6 +84,53 @@ class BlogsRouter(val blogRepository: BlogRepository, val logger: Logger)  {
                 is Left -> {
                     logger.error(result.value.toString())
                     call.respondText("sql fuckies")
+                }
+            }
+        }
+    }
+
+    private fun Route.deleteBlog() {
+        delete("/{id}") {
+            val errorOrAuthorization = call.request.headers["Authorization"]
+                .toOption()
+                .toEither { DataError.NotFound(None) }
+
+            val result = errorOrAuthorization
+                // Replace "Bearer " in auth header
+                .map { authHeader -> authHeader.replace("Bearer ", "") }
+                // Parse token to object
+                .flatMap { token -> JsonWebToken.parse(token) }
+                .flatMap { jwt -> jwt.validate() }
+                // Get payload
+                .flatMap { jwt -> jwt.getPayload() }
+                // Check expiry on payload
+                .map { payload -> Instant.ofEpochSecond(payload.expiry) > Instant.now() }
+                // lift expiry into error
+                .flatMap { isLoggedIn ->
+                    isLoggedIn.fold(
+                        { Unit.right() },
+                        { AuthError.ExpiredToken(None).left() }
+                    )
+                }
+                .flatMap {
+                    blogRepository.deleteBlog(Uuid.parse(call.parameters["id"]!!))
+                }
+
+            when (result) {
+                is Right -> {
+                    call.respond(HttpStatusCode.OK)
+                }
+                is Left -> {
+                    val error = result.value
+
+                    logger.error(error.toString())
+
+                    when (error) {
+                        is EncryptionError -> call.respondText("encryption fuckies")
+                        is SqlError -> call.respondText("sql fuckies")
+                        is DataError -> call.respondText("data fuckies")
+                        is AuthError -> call.respondText("auth fuckies")
+                    }
                 }
             }
         }

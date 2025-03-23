@@ -9,9 +9,12 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 interface BlogRepository {
-    suspend fun getBlogs(): Either<SqlError, List<Blog>>;
+    suspend fun getBlogs(includeArchived: Boolean): Either<SqlError, List<Blog>>;
     @OptIn(ExperimentalUuidApi::class)
     suspend fun getBlog(blogId: Uuid): Either<SqlError, Option<Blog>>;
     @OptIn(ExperimentalUuidApi::class)
     suspend fun createBlog(blogData: BlogCreate): Either<SqlError, Uuid>;
+    @OptIn(ExperimentalUuidApi::class)
+    suspend fun deleteBlog(blogId: Uuid): Either<SqlError, Unit>;
+
 }

@@ -9,6 +9,7 @@ import me.i18u.blog.SqlError
 import me.i18u.blog.db.model.Blog
 import me.i18u.blog.db.model.BlogCreate
 import net.samyn.kapper.coroutines.withConnection
+import net.samyn.kapper.execute
 import net.samyn.kapper.query
 import net.samyn.kapper.querySingle
 import org.slf4j.Logger
@@ -18,9 +19,15 @@ import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 
 class BlogPostgresRepository(val db: DataSource, val logger: Logger) : BlogRepository {
-    override suspend fun getBlogs(): Either<SqlError, List<Blog>> {
+    override suspend fun getBlogs(includeArchived: Boolean): Either<SqlError, List<Blog>> {
         return db.withConnection { connection ->
-            Either.catch { connection.query<Blog>("SELECT id, title, created_at as createdAt, content FROM blogs ORDER BY created_at DESC;") }
+            Either.catch {
+                if (includeArchived) {
+                    connection.query<Blog>("SELECT id, title, created_at as createdAt, content, archived FROM blogs ORDER BY created_at DESC;")
+                } else {
+                    connection.query<Blog>("SELECT id, title, created_at as createdAt, content, archived FROM blogs WHERE archived = false ORDER BY created_at DESC;")
+                }
+            }
                 .mapLeft { throwable -> SqlError.UnknownError("An unknown error occurred.", throwable.some()) }
         }
     }
@@ -28,7 +35,7 @@ class BlogPostgresRepository(val db: DataSource, val logger: Logger) : BlogRepos
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun getBlog(uuid: Uuid): Either<SqlError, Option<Blog>> {
         return db.withConnection { connection ->
-            Either.catch { connection.querySingle<Blog>("SELECT id, title, created_at as createdAt, content FROM blogs WHERE id = :id", "id" to uuid.toJavaUuid()).toOption() }
+            Either.catch { connection.querySingle<Blog>("SELECT id, title, created_at as createdAt, content, archived FROM blogs WHERE id = :id", "id" to uuid.toJavaUuid()).toOption() }
                 .mapLeft { throwable -> SqlError.UnknownError("An unknown error occurred", throwable.some()) }
         }
     }
@@ -46,6 +53,15 @@ class BlogPostgresRepository(val db: DataSource, val logger: Logger) : BlogRepos
                     "content" to blogCreate.content
                 )!! // This will either fail to create, causing an error, or return the ID.
             }.mapLeft { throwable -> SqlError.UnknownError("An unknown error occurred", throwable.some()) }
+        }
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    override suspend fun deleteBlog(blogId: Uuid): Either<SqlError, Unit> {
+        return db.withConnection { connection ->
+            Either.catch { connection.execute("UPDATE blogs SET archived = true WHERE id = :id", "id" to blogId.toJavaUuid()) }
+                .mapLeft { throwable -> SqlError.UnknownError("An unknown error occurred", throwable.some()) }
+                .map { } // Drop the affected row count
         }
     }
 }
