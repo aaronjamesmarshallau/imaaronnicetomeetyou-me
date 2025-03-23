@@ -150,8 +150,7 @@ export class ApiStack extends Stack {
           capacityProvider: "FARGATE_SPOT",
           weight: 1,
         }
-      ],
-      assignPublicIp: true,
+      ]
     });
 
     rdsInstance.connections.allowDefaultPortFrom(fargateService)
