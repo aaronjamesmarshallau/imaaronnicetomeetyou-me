@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType, Peer } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol, CfnService } from 'aws-cdk-lib/aws-ecs';
 import { Construct } from 'constructs';
 import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
@@ -151,14 +151,19 @@ export class ApiStack extends Stack {
           weight: 1,
         }
       ],
+      assignPublicIp: true,
     });
 
     (fargateService.node.defaultChild as CfnService).loadBalancers = [];
 
     rdsInstance.connections.allowDefaultPortFrom(fargateService)
 
+    const fargateServiceSG = fargateService.connections.securityGroups[0];
+
     // Allow inbound traffic from the ECS task's security group on the default RDS port (e.g., 3306 for MySQL)
-    rdsSecurityGroup.addIngressRule(fargateService.connections.securityGroups[0], Port.tcp(5432));
+    rdsSecurityGroup.addIngressRule(fargateServiceSG, Port.tcp(5432));
+
+    fargateServiceSG.addEgressRule(Peer.anyIpv4(), Port.allTcp());
 
     // Output the RDS endpoint URL for reference
     new cdk.CfnOutput(this, 'RdsEndpoint', {
