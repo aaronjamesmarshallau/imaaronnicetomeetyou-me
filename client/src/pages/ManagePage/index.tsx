@@ -1,5 +1,4 @@
-import { FunctionComponent, MouseEvent, MouseEventHandler, useCallback, useEffect, useState } from "react";
-import styled from "styled-components";
+import { FunctionComponent, MouseEvent, useCallback, useEffect, useState } from "react";
 
 import '@mdxeditor/editor/style.css'
 import { Page } from "../Page";
