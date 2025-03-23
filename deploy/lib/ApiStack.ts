@@ -1,13 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType, IpAddresses } from 'aws-cdk-lib/aws-ec2';
+import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol } from 'aws-cdk-lib/aws-ecs';
-import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import { Construct } from 'constructs';
 import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
-import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 interface ApiStackProps extends StackProps {
   apiVersion: string;
