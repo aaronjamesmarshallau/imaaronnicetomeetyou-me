@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol, CfnService } from 'aws-cdk-lib/aws-ecs';
 import { Construct } from 'constructs';
 import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -150,8 +150,10 @@ export class ApiStack extends Stack {
           capacityProvider: "FARGATE_SPOT",
           weight: 1,
         }
-      ]
+      ],
     });
+
+    (fargateService.node.defaultChild as CfnService).loadBalancers = [];
 
     rdsInstance.connections.allowDefaultPortFrom(fargateService)
 
