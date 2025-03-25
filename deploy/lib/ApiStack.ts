@@ -116,6 +116,7 @@ export class ApiStack extends Stack {
       portMappings: [
         {
           containerPort: 5174,
+          hostPort: 5174
         }
       ],
       logging: AwsLogDriver.awsLogs({
@@ -147,7 +148,7 @@ export class ApiStack extends Stack {
       },
       portMappings: [
         {
-          name: "cloudflare",
+          hostPort: 2000,
           containerPort: 2000,
           protocol: Protocol.TCP,
         }
