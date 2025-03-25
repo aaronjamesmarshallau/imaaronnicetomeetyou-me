@@ -111,7 +111,7 @@ export class ApiStack extends Stack {
 
     taskDefinition.addContainer('AppContainer', {
       image: ContainerImage.fromEcrRepository(ecrRepo, props.apiVersion), // Replace with your Docker image
-      memoryLimitMiB: 1024,
+      memoryLimitMiB: 512,
       cpu: 512,
       stopTimeout: cdk.Duration.seconds(15),
       portMappings: [
@@ -140,7 +140,7 @@ export class ApiStack extends Stack {
     });
 
     taskDefinition.addContainer("CloudflaredContainer", {
-      cpu: 256,
+      cpu: 512,
       memoryLimitMiB: 512,
       essential: true,
       image: ContainerImage.fromRegistry("cloudflare/cloudflared:2025.2.1"),
