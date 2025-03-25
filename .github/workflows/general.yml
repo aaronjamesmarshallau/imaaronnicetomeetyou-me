@@ -29,14 +29,15 @@ jobs:
     - check-client
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v2        
+      uses: actions/checkout@v2
+
     - name: Login to ECR
       id: ecr
       uses: jwalton/gh-ecr-login@v3
       with:
         access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
-        region: us-east-1
+        region: ap-southeast-2
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
