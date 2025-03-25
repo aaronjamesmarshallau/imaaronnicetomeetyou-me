@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType, Peer } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol, CfnService, EcsOptimizedImage, TaskDefinition, Compatibility, NetworkMode, Ec2Service } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol, CfnService, EcsOptimizedImage, TaskDefinition, Compatibility, NetworkMode, Ec2Service, AmiHardwareType } from 'aws-cdk-lib/aws-ecs';
 import { Construct } from 'constructs';
 import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -92,7 +92,7 @@ export class ApiStack extends Stack {
       minCapacity: 1,
       maxCapacity: 2,
       desiredCapacity: 1,
-      machineImage: EcsOptimizedImage.amazonLinux2(),
+      machineImage: EcsOptimizedImage.amazonLinux2(AmiHardwareType.ARM),
       vpcSubnets: {
         subnetType: SubnetType.PUBLIC
       },
