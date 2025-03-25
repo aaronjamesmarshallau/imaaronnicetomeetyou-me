@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Vpc, SecurityGroup, Port, InstanceType, InstanceClass, InstanceSize, SubnetType, Peer } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol, CfnService } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateTaskDefinition, FargateService, AwsLogDriver, Protocol, CfnService, EcsOptimizedImage, TaskDefinition, Compatibility, NetworkMode, Ec2Service } from 'aws-cdk-lib/aws-ecs';
 import { Construct } from 'constructs';
 import { DatabaseInstance, DatabaseInstanceEngine, PostgresEngineVersion, StorageType } from 'aws-cdk-lib/aws-rds';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
@@ -86,12 +86,26 @@ export class ApiStack extends Stack {
       vpc,
     });
 
+    // Create an Auto Scaling Group for EC2 instances
+    const autoScalingGroup = cluster.addCapacity('ClusterAutoScalingGroup', {
+      instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
+      minCapacity: 1,
+      maxCapacity: 2,
+      desiredCapacity: 1,
+      machineImage: EcsOptimizedImage.amazonLinux2(),
+      vpcSubnets: {
+        subnetType: SubnetType.PUBLIC
+      },
+      spotPrice: '0.0106',
+    });
+
     const ecrRepo = Repository.fromRepositoryName(this, 'EcrRepository', 'i18u/server')
 
     // Define the ECS task definition
-    const taskDefinition = new FargateTaskDefinition(this, 'ApiTaskDef', {
-      cpu: 1024,
-      memoryLimitMiB: 2048,
+    const taskDefinition = new TaskDefinition(this, 'ApiTaskDef', {
+      compatibility: Compatibility.EC2,
+      networkMode: NetworkMode.HOST,
+      family: "i18u-me-api"
     });
 
     taskDefinition.addContainer('AppContainer', {
@@ -142,23 +156,27 @@ export class ApiStack extends Stack {
     });
 
     // Create ECS service
-    const fargateService = new FargateService(this, 'FargateService', {
+    const ec2Service = new Ec2Service(this, 'EC2Service', {
       cluster,
       taskDefinition,
-      capacityProviderStrategies: [
-        {
-          capacityProvider: "FARGATE_SPOT",
-          weight: 1,
-        }
-      ],
+      desiredCount: 1,
       assignPublicIp: true,
     });
 
-    (fargateService.node.defaultChild as CfnService).loadBalancers = [];
+    const scaling = ec2Service.autoScaleTaskCount({
+      minCapacity: 1,
+      maxCapacity: 2,
+    });
 
-    rdsInstance.connections.allowDefaultPortFrom(fargateService)
+    scaling.scaleOnCpuUtilization('CpuScaling', {
+      targetUtilizationPercent: 80,
+    });
 
-    const fargateServiceSG = fargateService.connections.securityGroups[0];
+    (ec2Service.node.defaultChild as CfnService).loadBalancers = [];
+
+    rdsInstance.connections.allowDefaultPortFrom(ec2Service)
+
+    const fargateServiceSG = ec2Service.connections.securityGroups[0];
 
     // Allow inbound traffic from the ECS task's security group on the default RDS port (e.g., 3306 for MySQL)
     rdsSecurityGroup.addIngressRule(fargateServiceSG, Port.tcp(5432));
