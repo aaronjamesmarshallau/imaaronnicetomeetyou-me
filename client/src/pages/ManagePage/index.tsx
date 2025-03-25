@@ -25,10 +25,11 @@ const getBlogs = (): Promise<Blog[]> => {
 export const ManagePage: FunctionComponent = () => {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState<Blog[]>([]);
-    useEffect(() => {
-      getBlogs()
-        .then((data) => setBlogs(data));
-    }, []);
+  
+  useEffect(() => {
+    getBlogs()
+      .then((data) => setBlogs(data));
+  }, []);
 
   const deleteBlog = useCallback((id: string) => (e: MouseEvent<HTMLAnchorElement>): Promise<any> => {
     e.preventDefault();
