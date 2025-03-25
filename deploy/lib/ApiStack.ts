@@ -87,7 +87,7 @@ export class ApiStack extends Stack {
     });
 
     // Create an Auto Scaling Group for EC2 instances
-    const autoScalingGroup = cluster.addCapacity('ClusterAutoScalingGroup', {
+    cluster.addCapacity('ClusterAutoScalingGroup', {
       instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.MICRO),
       minCapacity: 1,
       maxCapacity: 2,
@@ -96,6 +96,7 @@ export class ApiStack extends Stack {
       vpcSubnets: {
         subnetType: SubnetType.PUBLIC
       },
+      associatePublicIpAddress: true,
       spotPrice: '0.0106',
     });
 
@@ -161,7 +162,6 @@ export class ApiStack extends Stack {
       cluster,
       taskDefinition,
       desiredCount: 1,
-      assignPublicIp: true,
     });
 
     const scaling = ec2Service.autoScaleTaskCount({
