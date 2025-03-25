@@ -61,7 +61,7 @@ function publish_server {
 
     aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REPO
 
-    docker buildx build server --platform "linux/arm64" -t "$image"
+    docker build server -t "$image"
     docker push "$image"
 }
 
