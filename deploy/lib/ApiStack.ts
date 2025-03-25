@@ -141,7 +141,7 @@ export class ApiStack extends Stack {
 
     taskDefinition.addContainer("CloudflaredContainer", {
       cpu: 512,
-      memoryLimitMiB: 512,
+      memoryLimitMiB: 384,
       essential: true,
       image: ContainerImage.fromRegistry("cloudflare/cloudflared:2025.2.1"),
       environment: {
