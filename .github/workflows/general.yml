@@ -82,7 +82,7 @@ jobs:
         push: true
         tags: aaronjamesmarshallau/i18u-client:${{ github.sha }}
         build-args: |
-          VITE_API_URL="https://api.imaaronnicetomeetyou.me"
+          VITE_API_URL=api.imaaronnicetomeetyou.me
 
   deploy:
     name: Deploy to Production
