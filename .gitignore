@@ -3,3 +3,4 @@
 .gradle
 build
 pg_data
+caddy_data

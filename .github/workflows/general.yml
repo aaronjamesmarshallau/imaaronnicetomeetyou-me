@@ -81,6 +81,8 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags: aaronjamesmarshallau/i18u-client:${{ github.sha }}
+        build-args:
+        - VITE_API_URL="https://api.imaaronnicetomeetyou.me"
 
   deploy:
     name: Deploy to Production
@@ -100,6 +102,8 @@ jobs:
         echo "CLIENT_IMAGE=aaronjamesmarshallau/i18u-client:${{ github.sha }}" >> deploy/.env
         echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> deploy/.env
         echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> deploy/.env
+        echo "CLIENT_PORT=${{ secrets.CLIENT_PORT }}" >> deploy/.env
+        echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> deploy/.env
         cp compose.yml deploy/docker-compose.yml
 
     - name: Deploy
