@@ -5,6 +5,17 @@ ECR_REPO="041260952467.dkr.ecr.ap-southeast-2.amazonaws.com"
 
 command=$1
 
+function help {
+    echo "Usage: ./go.sh <command> [arguments]"
+    echo "Commands:"
+    echo "- build_client"
+    echo "- build_server"
+    echo "- help"
+    echo "- package_client"
+    echo "- publish_client"
+    echo "- publish_server"
+}
+
 function build_client {
     cd client
 
@@ -25,17 +36,6 @@ function deploy {
 
     npm install
     API_VERSION=$version npx aws-cdk deploy --all --require-approval never
-}
-
-function help {
-    echo "Usage: ./go.sh <command> [arguments]"
-    echo "Commands:"
-    echo "- build_client"
-    echo "- build_server"
-    echo "- help"
-    echo "- package_client"
-    echo "- publish_client"
-    echo "- publish_server"
 }
 
 function package_client {
@@ -78,6 +78,12 @@ function test_server {
     docker compose run web gradle test
 }
 
+function localz {
+    docker build server -t i18u-server:latest
+    docker build client -t i18u-client:latest --build-arg VITE_API_URL=http://localhost:8001
+    docker compose up
+}
+
 case $command in
     build_client)
         build_client
@@ -105,6 +111,9 @@ case $command in
         ;;
     test_server)
         test_server
+        ;;
+    local)
+        localz
         ;;
     *)
         help

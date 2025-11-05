@@ -31,14 +31,6 @@ jobs:
     - name: Checkout Source
       uses: actions/checkout@v2
 
-    - name: Login to ECR
-      id: ecr
-      uses: jwalton/gh-ecr-login@v3
-      with:
-        access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
-        region: ap-southeast-2
-
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
 
@@ -52,34 +44,30 @@ jobs:
         platforms: linux/amd64,linux/arm64
         push: true
         tags: 041260952467.dkr.ecr.ap-southeast-2.amazonaws.com/i18u/server:${{ github.sha }}
-  deploy-infrastructure:
-    name: Deploy Infrastructure
+  deploy:
+    name: Deploy to Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    needs: publish-server
-    concurrency: "deploy-infrastructure"
+    needs: 
+    - publish-server
     steps:
     - name: Checkout Source
       uses: actions/checkout@v2
-    - name: Deploy via CDK
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
-        AWS_DEFAULT_REGION: ap-southeast-2
-        CLOUDFLARED_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARED_TUNNEL_TOKEN }}
-      run: ./go.sh deploy ${{ github.sha }}
-  publish-client:
-    name: Publish Client
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    needs: deploy-infrastructure
-    concurrency: "publish-client"
-    steps:
-    - name: Checkout Source
-      uses: actions/checkout@v2
-    - name: Sync assets to Server
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
-        AWS_DEFAULT_REGION: ap-southeast-2
-      run: ./go.sh publish_client
+
+    - name: Prepare Deployment Files
+      run: |
+        mkdir -p deploy
+        echo "SERVER_IMAGE=041260952467.dkr.ecr.ap-southeast-2.amazonaws.com/i18u/server:${{ github.sha }}" >> deploy/.env
+        echo "CLIENT_IMAGE=i18u-client:latest" >> deploy/.env
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> deploy/.env
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> deploy/.env
+        cp compose.yml deploy/docker-compose.yml
+
+    - name: Deploy
+      uses: easingthemes/ssh-deploy@main
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.I18U_SERVICE_PRIVATE_KEY }}
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        SOURCE: "deploy/"
+        SCRIPT_AFTER: "doas docker compose up -d"

@@ -12,17 +12,39 @@ import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import me.i18u.blog.db.BlogPostgresRepository
 import me.i18u.blog.db.TokenPostgresRepository
 import me.i18u.blog.db.UserPostgresRepository
 import me.i18u.blog.routing.AuthRouter
 import me.i18u.blog.routing.BlogsRouter
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.configuration.ClassicConfiguration
+import org.flywaydb.core.api.configuration.Configuration
+import org.flywaydb.core.api.configuration.FluentConfiguration
+import org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import kotlin.system.exitProcess
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 
 val ServerContentNegotiation = io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+
+suspend fun<T> retry(ctor: () -> T, attempts: List<Duration>): T? {
+    for (attempt in attempts) {
+        try {
+            return ctor()
+        } catch (ex: Exception) {
+            println("Failed, retrying...")
+            delay(attempt)
+        }
+    }
+
+    return null;
+}
 
 @ExperimentalUuidApi
 fun main() {
@@ -42,10 +64,22 @@ fun main() {
         maximumPoolSize = 10 // Set the pool size according to your needs
     }
 
-    val dataSource = HikariDataSource(config)
+    val dataSource = runBlocking { retry({ HikariDataSource(config) }, listOf(5.seconds, 15.seconds, 30.seconds)) }
+
+    if (dataSource == null) {
+        logger.error("unable to connect to database, aborting")
+        exitProcess(1)
+        return
+    }
 
     // Flyway
-    Flyway.configure().dataSource(dataSource).load().migrate()
+    Flyway.configure()
+        .dataSource(dataSource)
+        .configuration(mapOf("flyway.postgresql.transactional.lock" to "false"))
+        .load()
+        .migrate()
+
+    logger.info("Migrations completed, starting server")
 
     val server = createServer()
 
@@ -58,8 +92,12 @@ fun main() {
     val blogRouter = BlogsRouter(blogRepository, logger)
     val authRouter = AuthRouter(argon2, userRepository, tokenRepository, logger)
 
+    logger.info("Configuring routes...")
+
     blogRouter.addRoutes(server.application)
     authRouter.addRoutes(server.application)
+
+    logger.info("Starting server...")
 
     server.start(wait = true)
 }
