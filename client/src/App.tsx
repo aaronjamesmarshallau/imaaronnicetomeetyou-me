@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { BlogsPage } from "./pages/BlogsPage";
 import { CreatePage } from "./pages/CreatePage";
 import { RegisterPage } from "./pages/RegisterPage";
-import { DefaultPage } from "./pages/DefaultPage";
 import { LoginPage } from "./pages/LoginPage";
 import { BlogPage } from "./pages/BlogPage";
 import { ManagePage } from "./pages/ManagePage";
@@ -29,12 +28,10 @@ const App = () => {
     <BrowserRouter>
       <ThemeProvider theme={darkTheme}>
         <Routes>
-          <Route path="/" element={<DefaultPage />} >
-            <Route path="/" element={<BlogsPage />} />
-            <Route path="/b/:blogId" element={<BlogPage />} />
-            <Route path="/create" element={<CreatePage />} />
-            <Route path="/manage" element={<ManagePage />} />
-          </Route>
+          <Route path="/" element={<BlogsPage />} />
+          <Route path="/b/:blogId" element={<BlogPage />} />
+          <Route path="/create" element={<CreatePage />} />
+          <Route path="/manage" element={<ManagePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
         </Routes>

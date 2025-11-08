@@ -93,6 +93,26 @@ const getBlog = (blogId: string): Promise<Blog> => {
     }));
 };
 
+const Navigation = styled.nav`
+  margin-bottom: 16px;
+`;
+
+const Breadcrumb = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  font-size: 14px;
+`;
+
+const BreadcrumbLink = styled.a`
+  color: ${({ theme }) => theme.foreground.secondary};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 export const BlogPage: FunctionComponent<BlogsPageProps> = () => {
   const [blog, setBlog] = useState<Blog | undefined>(undefined);
   const { blogId } = useParams();
@@ -112,6 +132,12 @@ export const BlogPage: FunctionComponent<BlogsPageProps> = () => {
 
   return (
     <Page>
+      <Navigation>
+        <Breadcrumb>
+          <BreadcrumbLink href="/">&lt;</BreadcrumbLink>
+          <BreadcrumbLink href="/">{blog?.title || ""}</BreadcrumbLink>
+        </Breadcrumb>
+      </Navigation>
       {
         blog && <article key={blog.blogId}>
           <h2>{blog.title}</h2>

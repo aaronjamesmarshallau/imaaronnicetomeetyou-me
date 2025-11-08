@@ -18,6 +18,7 @@ const PageContent = styled("div")`
   box-sizing: border-box;
   padding-left: 20px;
   padding-right: 20px;
+  color: ${({ theme }) => theme.foreground.primary};
 `;
 
 const Page: FunctionComponent<PropsWithChildren<{}>> = ({ children }) => {
