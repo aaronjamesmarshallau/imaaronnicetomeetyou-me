@@ -5,7 +5,7 @@ services:
       - caddy
     labels:
       caddy: http://imaaronnicetomeetyou.me
-      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.reverse_proxy: "{{upstreams $CLIENT_PORT}}"
     ports:
       - "$CLIENT_PORT:80"
   server:
@@ -16,7 +16,7 @@ services:
       - caddy
     labels:
       caddy: http://api.imaaronnicetomeetyou.me
-      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.reverse_proxy: "{{upstreams $SERVER_PORT}}"
     depends_on:
       - "database"
     healthcheck:
