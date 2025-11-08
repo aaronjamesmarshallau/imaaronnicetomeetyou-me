@@ -98,7 +98,8 @@ const plugins = [
       shell: 'Shell',
       powershell: 'PowerShell',
       dockerfile: 'Dockerfile',
-      makefile: 'Makefile'
+      makefile: 'Makefile',
+      nix: 'Nix'
     }
   }),
   directivesPlugin({ directiveDescriptors: [AdmonitionDirectiveDescriptor] }),

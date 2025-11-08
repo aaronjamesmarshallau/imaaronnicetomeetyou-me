@@ -7,7 +7,23 @@ import { LoginPage } from "./pages/LoginPage";
 import { BlogPage } from "./pages/BlogPage";
 import { ManagePage } from "./pages/ManagePage";
 
-const darkTheme = {
+export interface CustomTheme {
+  background: {
+    primary: string,
+    secondary: string,
+  },
+  foreground: {
+    primary: string,
+    secondary: string,
+  },
+  highlight: {
+    primary: string,
+    secondary: string,
+    tertiary: string,
+  }
+}
+
+const darkTheme: CustomTheme = {
   background: {
     primary: '#1F1B2D',
     secondary: '#201D28',
