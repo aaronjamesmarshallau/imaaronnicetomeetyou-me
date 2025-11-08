@@ -8,6 +8,7 @@ import { Page } from "../Page";
 import { Button } from "../../components/forms/inputs/Button";
 import { authFetch, isLoggedIn } from "../../auth";
 import { useNavigate } from "react-router-dom";
+import { nix } from "@replit/codemirror-lang-nix";
 
 export const API_URL = import.meta.env.VITE_API_URL || "";
 
@@ -100,7 +101,10 @@ const plugins = [
       dockerfile: 'Dockerfile',
       makefile: 'Makefile',
       nix: 'Nix'
-    }
+    },
+    codeMirrorExtensions: [
+      nix()
+    ]
   }),
   directivesPlugin({ directiveDescriptors: [AdmonitionDirectiveDescriptor] }),
   diffSourcePlugin({ diffMarkdown: 'An older version', viewMode: 'rich-text' }),
