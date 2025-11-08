@@ -80,7 +80,7 @@ function test_server {
 
 function localz {
     docker build server -t i18u-server:latest
-    docker build client -t i18u-client:latest --build-arg VITE_API_URL=http://localhost:8001
+    docker build client -t i18u-client:latest --build-arg VITE_API_URL=http://api.imaaronnicetomeetyou.me
     docker compose up
 }
 
